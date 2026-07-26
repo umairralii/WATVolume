@@ -21,11 +21,13 @@ setInterval(purgeExpired, 60_000)
 
 app.get('/api/locations', (_req, res) => {
   const occupancy = getOccupancy()
-  const locations = LOCATIONS.map((loc) => ({
-    ...loc,
-    count: occupancy[loc.id] ?? 0,
-    percent: Math.round(((occupancy[loc.id] ?? 0) / loc.capacity) * 100),
-  }))
+  const locations = LOCATIONS.map((loc) => {
+    const count = occupancy[loc.id] ?? 0
+    const percent = loc.capacity
+      ? Math.round((count / loc.capacity) * 100)
+      : null
+    return { ...loc, count, percent }
+  })
   res.json(locations)
 })
 
@@ -48,7 +50,10 @@ app.post('/api/checkin', (req, res) => {
     return res.status(404).json({ error: 'Location not found' })
   }
   const occupancy = getOccupancy()
-  if ((occupancy[locationId] ?? 0) >= location.capacity) {
+  if (
+    location.capacity &&
+    (occupancy[locationId] ?? 0) >= location.capacity
+  ) {
     return res.status(409).json({ error: 'Location is at capacity' })
   }
   const existing = getCheckinBySession(sessionId)

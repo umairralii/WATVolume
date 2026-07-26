@@ -1,46 +1,15 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useLocations } from './hooks/useLocations'
 import { checkIn, checkOut } from './utils/api'
-import { formatTimeRemaining, sortLocations } from './utils/busyness'
+import { formatTimeRemaining, LEGEND } from './utils/busyness'
 import LocationCard from './components/LocationCard'
 import './App.css'
-
-const SORT_OPTIONS = [
-  { id: 'busiest', label: 'Busiest first' },
-  { id: 'quietest', label: 'Quietest first' },
-  { id: 'az', label: 'A–Z' },
-]
-
-function GradCapIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M12 3 2 8l10 5 10-5-10-5Z"
-        fill="currentColor"
-        opacity="0.9"
-      />
-      <path
-        d="M6 10.5v4.5c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M20 8.5v6"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
 
 function App() {
   const { locations, activeCheckin, loading, error, sessionId, refresh } =
     useLocations()
   const [actionLoading, setActionLoading] = useState(false)
   const [actionError, setActionError] = useState(null)
-  const [sortBy, setSortBy] = useState('busiest')
 
   async function handleCheckIn(locationId) {
     setActionLoading(true)
@@ -72,15 +41,8 @@ function App() {
     ? locations.find((l) => l.id === activeCheckin.locationId)
     : null
 
-  const totalStudying = useMemo(
-    () => locations.reduce((sum, l) => sum + l.count, 0),
-    [locations],
-  )
-
-  const sortedLocations = useMemo(
-    () => sortLocations(locations, sortBy),
-    [locations, sortBy],
-  )
+  const studySpots = locations.filter((l) => l.category !== 'library')
+  const libraries = locations.filter((l) => l.category === 'library')
 
   const cardProps = (loc) => ({
     location: loc,
@@ -94,38 +56,54 @@ function App() {
 
   return (
     <div className="app">
+      <div className="app-glow" aria-hidden="true" />
+
       <header className="header">
         <div className="header-inner">
           <div className="brand">
-            <div className="logo-mark">
-              <GradCapIcon />
-            </div>
+            <div className="logo-mark">W</div>
             <div className="logo-text">
-              <span className="logo-name">WATVolume</span>
-              <span className="logo-sub">UW campus study spots, live</span>
+              <span className="logo-name">
+                <span className="logo-wat">WAT</span>Volume
+              </span>
+              <span className="logo-sub">University of Waterloo</span>
             </div>
           </div>
-          <div className="live-pill">
-            <span className="live-dot" />
-            Live · {totalStudying} studying
+          <div className="header-status">
+            <span className="live-indicator">
+              <span className="live-dot" />
+              Live
+            </span>
           </div>
         </div>
       </header>
 
+      <div className="gold-rule" aria-hidden="true" />
+
       <main className="main">
         <section className="hero">
-          <h1 className="hero-title">How busy is campus right now?</h1>
+          <h1 className="hero-title">UW Study Spot Occupancy</h1>
           <p className="hero-subtitle">
-            Crowdsourced by students — check in when you arrive, check out when
-            you leave. Counts auto-expire after 4 hours.
+            Crowdsourced by students in real time. Check in when you arrive,
+            check out when you leave. Counts auto-expire after 4 hours.
           </p>
         </section>
 
+        <div className="legend" aria-label="Busyness color legend">
+          {LEGEND.map((item) => (
+            <span key={item.className} className="legend-item">
+              <span className={`legend-dot ${item.className}`} />
+              {item.label}
+            </span>
+          ))}
+        </div>
+
         {activeCheckin && activeLocation && (
           <div className="active-banner">
-            <span>
-              Checked in at <strong>{activeLocation.name}</strong>
-            </span>
+            <div className="active-banner-content">
+              <span className="active-label">Checked in</span>
+              <span className="active-location">{activeLocation.name}</span>
+            </div>
             <span className="auto-checkout-note">
               {formatTimeRemaining(activeCheckin.checkedInAt)}
             </span>
@@ -138,34 +116,40 @@ function App() {
           </div>
         )}
 
-        <div className="sort-bar">
-          <span className="sort-label">Sort:</span>
-          <div className="sort-options">
-            {SORT_OPTIONS.map((opt) => (
-              <button
-                key={opt.id}
-                type="button"
-                className={`sort-btn ${sortBy === opt.id ? 'active' : ''}`}
-                onClick={() => setSortBy(opt.id)}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {loading && locations.length === 0 ? (
           <div className="loading-state">
             <div className="loading-spinner" />
             <p>Loading locations…</p>
           </div>
         ) : (
-          <div className="location-grid">
-            {sortedLocations.map((loc) => (
-              <LocationCard key={loc.id} {...cardProps(loc)} />
-            ))}
-          </div>
+          <>
+            {libraries.length > 0 && (
+              <section className="location-section">
+                <h2 className="section-label">Libraries</h2>
+                <div className="location-grid">
+                  {libraries.map((loc) => (
+                    <LocationCard key={loc.id} {...cardProps(loc)} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {studySpots.length > 0 && (
+              <section className="location-section">
+                <h2 className="section-label">Study spots</h2>
+                <div className="location-grid">
+                  {studySpots.map((loc) => (
+                    <LocationCard key={loc.id} {...cardProps(loc)} />
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
         )}
+
+        <footer className="footer">
+          <p>Sessions auto-expire after 4 hours · Updates every 10 seconds</p>
+        </footer>
       </main>
     </div>
   )

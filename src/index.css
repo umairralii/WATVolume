@@ -1,36 +1,41 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg: #0c0c0c;
-  --bg-card: #141414;
-  --bg-card-hover: #181818;
-  --gold: #e8a820;
-  --gold-bright: #f5bc2a;
-  --gold-text: #d4971a;
-  --white: #f0f0f0;
-  --white-muted: #8a8a8a;
-  --white-faint: #5a5a5a;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --empty: #6b6b6b;
-  --quiet: #34d399;
-  --moderate: #e8a820;
-  --busy: #f97316;
-  --packed: #ef4444;
+  --bg-base: #050505;
+  --bg-elevated: #0a0a0a;
+  --bg-surface: #111111;
+  --bg-hover: #161616;
+  --gold: #ffd320;
+  --gold-bright: #ffe566;
+  --gold-dim: rgba(255, 211, 32, 0.6);
+  --gold-subtle: rgba(255, 211, 32, 0.08);
+  --gold-glow: rgba(255, 211, 32, 0.12);
+  --white: #ededed;
+  --white-muted: #888888;
+  --white-faint: #555555;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.1);
+  --empty: #34d399;
+  --quiet: #ffd320;
+  --moderate: #f97316;
+  --busy: #ef4444;
 
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --radius: 10px;
-  --radius-pill: 100px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-gold: 0 0 0 1px rgba(255, 211, 32, 0.15), 0 8px 32px rgba(255, 211, 32, 0.08);
 
   font-family: var(--font);
   font-size: 15px;
   line-height: 1.5;
   color: var(--white);
-  background: var(--bg);
+  background: var(--bg-base);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 *,
@@ -42,7 +47,7 @@
 body {
   margin: 0;
   min-height: 100svh;
-  background: var(--bg);
+  background: var(--bg-base);
 }
 
 #root {
@@ -52,6 +57,7 @@ body {
 a {
   color: var(--gold);
   text-decoration: none;
+  transition: color 0.15s;
 }
 
 a:hover {
