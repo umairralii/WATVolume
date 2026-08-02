@@ -6,6 +6,11 @@ import { AUTO_CHECKOUT_MS } from './data.js'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_FILE = join(__dirname, 'checkins.json')
 
+// Clear checkins on startup
+if (existsSync(DATA_FILE)) {
+  writeFileSync(DATA_FILE, JSON.stringify({ checkins: [] }, null, 2))
+}
+
 function load() {
   if (!existsSync(DATA_FILE)) return { checkins: [] }
   try {
